@@ -1,4 +1,4 @@
-# Домашнее задание к занятию "`GitLab`" - `Дёмин максим`
+# Домашнее задание к занятию "`Подъём инфраструктуры в Yandex Cloud`" - `Дёмин максим`
 
 
 ### Задание 1
@@ -15,18 +15,23 @@
 
 <img width="1919" height="1079" alt="Screenshot_20260107_194054" src="https://github.com/user-attachments/assets/20a59926-05ca-4108-891f-71b7ca97b71e" />
 
+4. ansible-playbook -i ./hosts.ini test.yml
+
 <img width="1920" height="1080" alt="Screenshot_20260107_194715" src="https://github.com/user-attachments/assets/45dc35ff-170f-4ccc-88fa-e2fd65f42169" />
+
+5. ssh -J demin@158.160.39.145 demin@10.0.1.15 и ssh -J demin@158.160.39.145 demin@10.0.2.16
 
 <img width="1920" height="1080" alt="Screenshot_20260107_194942" src="https://github.com/user-attachments/assets/a986f94b-4b39-4d49-a9e3-d25830ec957f" />
 
 ### Задание 2
 С помощью ansible подключиться к web-a и web-b , установить на них nginx.(написать нужный ansible playbook)
 
-ansible-playbook -i ./hosts.ini nginx.yml
-
 Провести тестирование и приложить скриншоты развернутых в облаке ВМ, успешно отработавшего ansible playbook.
 
 ### Решение:
+
+1. ansible-playbook -i ./hosts.ini [nginx.yml](nginx.yml)
+
 <img width="1920" height="1080" alt="Screenshot_20260107_200828" src="https://github.com/user-attachments/assets/f1c3ea72-6d76-4b57-83c9-243f8ef2b54a" />
 
 <img width="1920" height="1080" alt="Screenshot_20260107_201035" src="https://github.com/user-attachments/assets/23de5786-b918-4383-b099-fd3047c4cb27" />
