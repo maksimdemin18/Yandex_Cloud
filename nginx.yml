@@ -1,0 +1,109 @@
+---
+- name: Install and configure Nginx on Ubuntu
+  hosts: webservers
+  gather_facts: false
+  become: true
+
+
+  vars:
+    nginx_site_name: "app"
+    nginx_listen_port: 80
+    nginx_server_name: "_"
+    nginx_root: "/var/www/app"
+
+  pre_tasks:
+    - name: Validating the ssh port is open
+      ansible.builtin.wait_for:
+        host: "{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}"
+        port: 22
+        delay: 3
+        timeout: 120
+        state: started
+        search_regex: OpenSSH
+
+    - name: Gather facts (needed for apt on some setups)
+      ansible.builtin.setup:
+
+  tasks:
+    - name: Update apt cache and install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Ensure nginx is enabled and started
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Create web root directory
+      ansible.builtin.file:
+        path: "{{ nginx_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+    - name: Put a simple index.html
+      ansible.builtin.copy:
+        dest: "{{ nginx_root }}/index.html"
+        owner: www-data
+        group: www-data
+        mode: "0644"
+        content: |
+          <html>
+          <head><title>Nginx OK</title></head>
+          <body>
+            <h1>Nginx is working</h1>
+            <p>Host: {{ inventory_hostname }}</p>
+          </body>
+          </html>
+      notify: Reload nginx
+
+    - name: Deploy site config
+      ansible.builtin.copy:
+        dest: "/etc/nginx/sites-available/{{ nginx_site_name }}.conf"
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          server {
+              listen {{ nginx_listen_port }};
+              server_name {{ nginx_server_name }};
+
+              root {{ nginx_root }};
+              index index.html;
+
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+
+              access_log /var/log/nginx/{{ nginx_site_name }}.access.log;
+              error_log  /var/log/nginx/{{ nginx_site_name }}.error.log;
+          }
+      notify: Reload nginx
+
+    - name: Enable site
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/{{ nginx_site_name }}.conf"
+        dest: "/etc/nginx/sites-enabled/{{ nginx_site_name }}.conf"
+        state: link
+        force: true
+      notify: Reload nginx
+
+    - name: Disable default site if present
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
+
+    - name: Validate nginx configuration
+      ansible.builtin.command: nginx -t
+      changed_when: false
+
+  handlers:
+    - name: Reload nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded

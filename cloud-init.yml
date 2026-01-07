@@ -1,0 +1,8 @@
+#cloud-config
+users:
+  - name: demin
+    groups: sudo
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG0CZM0XWODQo+VgZibOX02DiC0VyLjHZuTlFP5iiRMf maksimd@maksimd-Pulse
